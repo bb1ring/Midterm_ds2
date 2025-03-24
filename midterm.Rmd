@@ -3,6 +3,8 @@ title: "Midterm"
 author: "Sining Leng"
 date: "2025-03-24"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -11,11 +13,94 @@ library(dplyr)
 library(caret)
 library(car)
 library(readr)
+library(tidyr)
+library(knitr)
 ```
 
 Load data
 ```{r, message=FALSE}
 load("dat1.RData")
 load("dat2.RData")
+```
+
+# EXPLORATORY DATA ANALYSIS
+
+## Summary statistics
+```{r}
+summarize_cat = function(data, var_name) {
+  
+  var_label = deparse(substitute(var_name))
+  
+  out_df = 
+    data |> 
+    count({{ var_name }}) |> 
+    mutate(
+      Percent = round(100 * n / sum(n), 1),
+      Variable = var_label,
+      Level = as.character({{ var_name }})
+    ) |> 
+    rename(N = n) |> 
+    select(Variable, Level, N, Percent)
+  
+  return(out_df)
+}
+
+gender <- summarize_cat(dat1, gender)
+race <- summarize_cat(dat1, race)
+smoking <- summarize_cat(dat1, smoking)
+diabetes <- summarize_cat(dat1, diabetes)
+hypertension <- summarize_cat(dat1, hypertension)
+bind_rows(gender, race, smoking, diabetes, hypertension) %>%
+  knitr::kable()
+
+summarize_cont = function(data, var_name) {
+  
+  var_label = deparse(substitute(var_name))
+  
+  out_df = 
+    data |> 
+    summarize(
+      Variable = var_label,
+      Median = round(median({{ var_name }}, na.rm = TRUE), 1),
+      Q1 = round(quantile({{ var_name }}, 0.25, na.rm = TRUE), 1),
+      Q3 = round(quantile({{ var_name }}, 0.75, na.rm = TRUE), 1)
+    ) |> 
+    mutate(
+      IQR = paste0("[", Q1, ", ", Q3, "]")
+    ) |> 
+    select(Variable, Median, IQR)
+  
+  return(out_df)
+}
+
+age = summarize_cont(dat1, age)
+bmi = summarize_cont(dat1, bmi)
+height = summarize_cont(dat1, height)
+weight = summarize_cont(dat1, weight)
+SBP = summarize_cont(dat1, SBP)
+LDL = summarize_cont(dat1, LDL)
+log_anti = summarize_cont(dat1, log_antibody)
+bind_rows(age, bmi, height, weight, SBP, LDL, log_anti) %>%
+  knitr::kable()
+```
+
+```{r}
+ggplot(dat1, aes(x = log_antibody)) +
+  geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
+  labs(title = "Distribution of Log-Transformed Antibody Levels")
+```
+
+```{r}
+ggplot(dat1, aes(x = time, y = log_antibody)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", color = "blue") +
+  labs(title = "Antibody Level vs Time Since Vaccination")
+```
+
+```{r}
+ggplot(dat1, aes(x = factor(gender), y = log_antibody)) +
+  geom_boxplot() +
+  scale_x_discrete(labels = c("Female", "Male")) +
+  labs(title = "Antibody Level by Gender")
 ```
 
