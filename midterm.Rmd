@@ -6,5 +6,16 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(car)
+library(readr)
 ```
+
+Load data
+```{r, message=FALSE}
+load("dat1.RData")
+load("dat2.RData")
+```
+
