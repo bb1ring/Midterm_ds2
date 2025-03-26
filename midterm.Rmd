@@ -127,6 +127,10 @@ ggplot(dat1, aes(x = factor(gender), y = log_antibody)) +
   labs(title = "Antibody Level by Gender")
 ```
 
+```{r}
+ctrl = trainControl(method = "cv", number = 10)
+```
+
 # Lasso
 ```{r}
 x1 <- model.matrix(log_antibody ~ age + gender + race + smoking + bmi +
@@ -136,12 +140,9 @@ y1 <- dat1$log_antibody
 x2 <- model.matrix(log_antibody ~ age + gender + race + smoking + bmi +
                    diabetes + hypertension + SBP + LDL + time, data = dat2)[, -1]
 y2 <- dat2$log_antibody
-```
-
-```{r}
 set.seed(123)
 cv.lasso = cv.glmnet(x1, y1, alpha = 1,
-                     lambda = exp(seq(5, -30, length = 100)))
+                     lambda = exp(seq(2, -10, length = 80)))
 
 plot(cv.lasso)
 cv.lasso$lambda.1se
@@ -155,29 +156,45 @@ sqrt(mean((pred_glmnet - y2)^2))
 plot(y2, pred_glmnet,
      xlab = "Observed Log Antibody Level",
      ylab = "Predicted",
-     main = "Observed vs Predicted (Lasso - dat2)")
+     main = "Observed vs Predicted (Lasso)")
 abline(0, 1, col = "red")
+```
+
+```{r}
+set.seed(123)
+x1 <- model.matrix(log_antibody ~ ., dat1)[, -1]
+y1 <- dat1$log_antibody
+
+x2 <- model.matrix(log_antibody ~ ., dat2)[, -1]
+y2 <- dat2$log_antibody
+lasso.fit <- train(log_antibody ~ .,
+                   data = dat1,
+                   method = "glmnet",
+                   tuneGrid = expand.grid(alpha = 1,
+                                          lambda = exp(seq(2, -10, length = 80))),
+                   trControl = ctrl)
+plot(lasso.fit, xTrans = log)
+lasso.fit$bestTune
 ```
 
 # GAM
 ```{r}
 set.seed(123)
 
-ctrl = trainControl(method = "cv", number = 10)
-
 gam.fit <- train(x1, y1, method = "gam", trControl = ctrl)
 gam.fit$bestTune
 gam.fit$finalModel
 
-gam_model <- gam(log_antibody ~ gender + race + smoking + 
-    diabetes + hypertension + s(age) + s(SBP) + s(LDL) + s(bmi) + 
-    s(time), data = dat1)
-
 par(mfrow = c(2, 2))
-plot(gam_model)
+plot(gam.fit$finalModel)
 
-pred_gam <- predict(gam_model, newdata = dat2)
+pred_gam <- predict(gam.fit$finalModel, newdata = dat2)
 sqrt(mean((pred_gam - y2)^2))
+```
+
+```{r}
+resample = resamples(list(lasso = lasso.fit, gam = gam.fit))
+summary(resample)
 ```
 
 # Antibody level and time
