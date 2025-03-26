@@ -16,6 +16,8 @@ library(readr)
 library(tidyr)
 library(knitr)
 library(patchwork)
+library(glmnet)
+library(earth)
 ```
 
 Load data
@@ -127,10 +129,61 @@ ggplot(dat1, aes(x = factor(gender), y = log_antibody)) +
 
 # Lasso
 ```{r}
+x1 <- model.matrix(log_antibody ~ age + gender + race + smoking + bmi +
+                   diabetes + hypertension + SBP + LDL + time, data = dat1)[, -1]
 y1 <- dat1$log_antibody
-x1 <- model.matrix(log_antibody ~ ., data = dat1)[,-1]
 
+x2 <- model.matrix(log_antibody ~ age + gender + race + smoking + bmi +
+                   diabetes + hypertension + SBP + LDL + time, data = dat2)[, -1]
 y2 <- dat2$log_antibody
-x2 <- model.matrix(log_antibody ~ ., data = dat2)[,-1]
+```
+
+```{r}
+set.seed(123)
+cv.lasso = cv.glmnet(x1, y1, alpha = 1,
+                     lambda = exp(seq(5, -30, length = 100)))
+
+plot(cv.lasso)
+cv.lasso$lambda.1se
+
+predict(cv.lasso, s = "lambda.1se", type = "coefficients")
+
+pred_glmnet <- predict(cv.lasso, newx = dat2, s = "lambda.1se")
+sqrt(mean((pred_glmnet - y2)^2))
+
+# Plot predicted vs actual
+plot(y2, pred_glmnet,
+     xlab = "Observed Log Antibody Level",
+     ylab = "Predicted",
+     main = "Observed vs Predicted (Lasso - dat2)")
+abline(0, 1, col = "red")
+```
+
+# GAM
+```{r}
+set.seed(123)
+
+ctrl = trainControl(method = "cv", number = 10)
+
+gam.fit <- train(x1, y1, method = "gam", trControl = ctrl)
+gam.fit$bestTune
+gam.fit$finalModel
+
+gam_model <- gam(log_antibody ~ gender + race + smoking + 
+    diabetes + hypertension + s(age) + s(SBP) + s(LDL) + s(bmi) + 
+    s(time), data = dat1)
+
+par(mfrow = c(2, 2))
+plot(gam_model)
+
+pred_gam <- predict(gam_model, newdata = dat2)
+sqrt(mean((pred_gam - y2)^2))
+```
+
+# Antibody level and time
+```{r}
+library(splines)
+model_spline <- lm(log_antibody ~ ns(time, df = 4), data = dat1)
+summary(model_spline)
 ```
 
