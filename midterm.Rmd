@@ -15,12 +15,21 @@ library(car)
 library(readr)
 library(tidyr)
 library(knitr)
+library(patchwork)
 ```
 
 Load data
 ```{r, message=FALSE}
 load("dat1.RData")
 load("dat2.RData")
+
+dat1 =
+  dat1 |>
+  select(-id)
+
+dat2 =
+  dat2 |>
+  select(-id)
 ```
 
 # EXPLORATORY DATA ANALYSIS
@@ -84,17 +93,29 @@ bind_rows(age, bmi, height, weight, SBP, LDL, log_anti) %>%
   knitr::kable()
 ```
 
+# Distribution of antibody levels
 ```{r}
 ggplot(dat1, aes(x = log_antibody)) +
   geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
   labs(title = "Distribution of Log-Transformed Antibody Levels")
+
+ggplot(dat2, aes(x = log_antibody)) +
+  geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
+  labs(title = "Distribution of Log-Transformed Antibody Levels")
 ```
 
+# Antibody level vs time since vaccination
 ```{r}
-ggplot(dat1, aes(x = time, y = log_antibody)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = "loess", color = "blue") +
-  labs(title = "Antibody Level vs Time Since Vaccination")
+p1 = ggplot(dat1, aes(x = time, y = log_antibody)) +
+geom_point(alpha = 0.5) +
+geom_smooth(method = "loess", color = "blue") +
+labs(title = "Dataset 1: Antibody Level vs Time")
+
+p2 = ggplot(dat2, aes(x = time, y = log_antibody)) +
+geom_point(alpha = 0.5) +
+geom_smooth(method = "loess", color = "blue") +
+labs(title = "Dataset 2: Antibody Level vs Time")
+p1 + p2
 ```
 
 ```{r}
@@ -102,5 +123,14 @@ ggplot(dat1, aes(x = factor(gender), y = log_antibody)) +
   geom_boxplot() +
   scale_x_discrete(labels = c("Female", "Male")) +
   labs(title = "Antibody Level by Gender")
+```
+
+# Lasso
+```{r}
+y1 <- dat1$log_antibody
+x1 <- model.matrix(log_antibody ~ ., data = dat1)[,-1]
+
+y2 <- dat2$log_antibody
+x2 <- model.matrix(log_antibody ~ ., data = dat2)[,-1]
 ```
 
