@@ -37,10 +37,6 @@ dat1 =
 dat2 =
   dat2 |>
   select(-id)
-
-dat2$gender <- factor(dat2$gender, levels = levels(dat1$gender))
-dat2$diabetes <- factor(dat2$diabetes, levels = levels(dat1$diabetes))
-dat2$hypertension <- factor(dat2$hypertension, levels = levels(dat1$hypertension))
 ```
 
 
