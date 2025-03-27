@@ -218,9 +218,9 @@ model_lasso <- train(
   method = "glmnet",
   trControl = ctrl,
   tuneGrid = expand.grid(alpha = 1,
-                         lambda = seq(0.001, 0.05, length = 80))
+                         lambda = exp(seq(2, -10, length = 100))
 
-)
+))
 
 plot(model_lasso, xTrans = log)
 model_lasso$bestTune
@@ -274,19 +274,6 @@ pred_gam   <- predict(model_gam, newdata = dat2)
 resample = resamples(list(lasso = model_lasso, gam = model_gam, mars = model_mars))
 summary(resample)
 ```
-
-
-
-
-
-
-
-
-# GAM
-
-
-pred_gam <- predict(gam.fit$finalModel, newdata = dat2)
-sqrt(mean((pred_gam - y2)^2))
 
 
 
