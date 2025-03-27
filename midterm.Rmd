@@ -43,7 +43,7 @@ dat2 =
 # Explorey Data Analysis and Visualization 
 
 ## Summary statistics
-
+dat1
 ```{r}
 summarize_cat = function(data, var_name) {
   
@@ -97,11 +97,33 @@ height = summarize_cont(dat1, height)
 weight = summarize_cont(dat1, weight)
 SBP = summarize_cont(dat1, SBP)
 LDL = summarize_cont(dat1, LDL)
+time = summarize_cont(dat1, time)
 log_anti = summarize_cont(dat1, log_antibody)
-bind_rows(age, bmi, height, weight, SBP, LDL, log_anti) %>%
+bind_rows(age, bmi, height, weight, SBP, LDL, time, log_anti) %>%
   knitr::kable()
 ```
 
+dat2
+```{r}
+gender <- summarize_cat(dat2, gender)
+race <- summarize_cat(dat2, race)
+smoking <- summarize_cat(dat2, smoking)
+diabetes <- summarize_cat(dat2, diabetes)
+hypertension <- summarize_cat(dat2, hypertension)
+bind_rows(gender, race, smoking, diabetes, hypertension) %>%
+  knitr::kable()
+
+age = summarize_cont(dat2, age)
+bmi = summarize_cont(dat2, bmi)
+height = summarize_cont(dat2, height)
+weight = summarize_cont(dat2, weight)
+SBP = summarize_cont(dat2, SBP)
+LDL = summarize_cont(dat2, LDL)
+time = summarize_cont(dat2, time)
+log_anti = summarize_cont(dat2, log_antibody)
+bind_rows(age, bmi, height, weight, SBP, LDL, time, log_anti) %>%
+  knitr::kable()
+```
 
 ## Distribution of antibody levels
 
@@ -157,19 +179,19 @@ dat1 %>%
 dat1 %>%
   select(log_antibody, gender, race, smoking, diabetes, hypertension) %>%
   mutate(
-    gender = factor(dat1$gender, 
+    gender = factor(gender, 
                       levels = c(0, 1), 
                       labels = c("Female", "Male")),
-    race = factor(dat1$race, 
+    race = factor(race, 
                     levels = c(1, 2, 3, 4), 
                     labels = c("White", "Asian", "Black", "Hispanic")),
-    smoking = factor(dat1$smoking, 
+    smoking = factor(smoking, 
                        levels = c(0, 1, 2), 
                        labels = c("Never", "Former", "Current")),
-    diabetes = factor(dat1$diabetes, 
+    diabetes = factor(diabetes, 
                         levels = c(0, 1), 
                         labels = c("No", "Yes")),
-    hypertension = factor(dat1$hypertension, 
+    hypertension = factor(hypertension, 
                             levels = c(0, 1), 
                             labels = c("No", "Yes"))
   ) %>%
