@@ -188,6 +188,20 @@ dat1 %>%
   )
 ```
 
+# Antibody level and time
+```{r}
+p1 <- ggplot(dat1, aes(x = time, y = log_antibody)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", color = "blue") +
+  labs(title = "Antibody Level vs Time Since Vaccination (dat1)")
+
+p2 <- ggplot(dat2, aes(x = time, y = log_antibody)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", color = "blue") +
+  labs(title = "Antibody Level vs Time Since Vaccination (dat2)")
+
+p1+p2
+```
 
 
 # Models Building
@@ -273,13 +287,4 @@ summary(resample)
 ```
 
 MARS model has the lowest RMSE (0.5276)
-
-
-# Antibody level and time
-```{r}
-set.seed(123)
-library(splines)
-model_spline <- lm(log_antibody ~ ns(time, df = 4), data = dat1)
-summary(model_spline)
-```
 
