@@ -18,6 +18,8 @@ library(knitr)
 library(patchwork)
 library(glmnet)
 library(earth)
+library(tidyverse)
+library(corrplot)
 ```
 
 Load data
@@ -34,9 +36,11 @@ dat2 =
   select(-id)
 ```
 
-# EXPLORATORY DATA ANALYSIS
+
+# Explorey Data Analysis and Visualization 
 
 ## Summary statistics
+
 ```{r}
 summarize_cat = function(data, var_name) {
   
@@ -95,7 +99,9 @@ bind_rows(age, bmi, height, weight, SBP, LDL, log_anti) %>%
   knitr::kable()
 ```
 
-# Distribution of antibody levels
+
+## Distribution of antibody levels
+
 ```{r}
 ggplot(dat1, aes(x = log_antibody)) +
   geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
@@ -106,26 +112,92 @@ ggplot(dat2, aes(x = log_antibody)) +
   labs(title = "Distribution of Log-Transformed Antibody Levels")
 ```
 
-# Antibody level vs time since vaccination
-```{r}
-p1 = ggplot(dat1, aes(x = time, y = log_antibody)) +
-geom_point(alpha = 0.5) +
-geom_smooth(method = "loess", color = "blue") +
-labs(title = "Dataset 1: Antibody Level vs Time")
 
-p2 = ggplot(dat2, aes(x = time, y = log_antibody)) +
-geom_point(alpha = 0.5) +
-geom_smooth(method = "loess", color = "blue") +
-labs(title = "Dataset 2: Antibody Level vs Time")
-p1 + p2
+## Scatterplots of Continuous Predictors vs. Log-Antibody
+
+```{r}
+dat1 %>%
+  select(age, height, weight, bmi, SBP, LDL, time, log_antibody) %>%
+  pivot_longer(
+    cols = c(age,  height, weight, bmi, SBP, LDL, time),
+    names_to = "predictor",
+    values_to = "value"
+  ) %>%
+  ggplot(aes(x = value, y = log_antibody)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  facet_wrap(~ predictor, scales = "free_x") +
+  labs(
+    x = "Predictor Value",
+    y = "Log-Antibody",
+    title = "Scatterplots of Continuous Predictors vs. Log-Antibody"
+  )
 ```
 
+
+## Correlation Matrix of Continuous Variables
+
 ```{r}
-ggplot(dat1, aes(x = factor(gender), y = log_antibody)) +
+dat1 %>%
+  select(age, height, weight, bmi, SBP, LDL, time, log_antibody) %>%
+  cor(use = "complete.obs") %>% 
+  corrplot(type = "full",
+           title = "Correlation Matrix of Continuous Variables",
+           addCoef.col = "black",
+           mar = c(0,0,2,0))
+```
+
+
+## Boxplots of log_antibody by categorical variables
+
+```{r}
+dat1 %>%
+  select(log_antibody, gender, race, smoking, diabetes, hypertension) %>%
+  mutate(
+    gender = factor(dat1$gender, 
+                      levels = c(0, 1), 
+                      labels = c("Female", "Male")),
+    race = factor(dat1$race, 
+                    levels = c(1, 2, 3), 
+                    labels = c("White", "Black", "Other")),
+    smoking = factor(dat1$smoking, 
+                       levels = c(0, 1, 2), 
+                       labels = c("Never", "Former", "Current")),
+    diabetes = factor(dat1$diabetes, 
+                        levels = c(0, 1), 
+                        labels = c("No", "Yes")),
+    hypertension = factor(dat1$hypertension, 
+                            levels = c(0, 1), 
+                            labels = c("No", "Yes"))
+  ) %>%
+  pivot_longer(
+    cols = c(gender, race, smoking, diabetes, hypertension),
+    names_to = "predictor",
+    values_to = "category"
+  ) %>% 
+  ggplot(aes(x = category, y = log_antibody)) +
   geom_boxplot() +
-  scale_x_discrete(labels = c("Female", "Male")) +
-  labs(title = "Antibody Level by Gender")
+  facet_wrap(~ predictor, scales = "free_x") +
+  labs(
+    x = "Category",
+    y = "Log-Antibody",
+    title = "Boxplots of Log-Antibody by Categorical Predictors"
+  )
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 ctrl = trainControl(method = "cv", number = 10)
