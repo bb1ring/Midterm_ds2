@@ -130,11 +130,19 @@ bind_rows(age, bmi, height, weight, SBP, LDL, time, log_anti) %>%
 ```{r}
 ggplot(dat1, aes(x = log_antibody)) +
   geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
-  labs(title = "Distribution of Log-Transformed Antibody Levels")
+  labs(x = "Log-transformed antibody level",
+       y = "Frequency",
+       title = "Distribution of Log-Transformed Antibody Levels",
+       subtitle = "dat1") +
+  theme_classic()
 
 ggplot(dat2, aes(x = log_antibody)) +
   geom_histogram(binwidth = 0.2, fill = 'skyblue', color = 'black') +
-  labs(title = "Distribution of Log-Transformed Antibody Levels")
+  labs(x = "Log-transformed antibody level",
+       y = "Frequency",
+       title = "Distribution of Log-Transformed Antibody Levels",
+       subtitle = "dat2") +
+  theme_classic()
 ```
 
 
@@ -156,7 +164,7 @@ dat1 %>%
     x = "Predictor Value",
     y = "Log-Antibody",
     title = "Scatterplots of Continuous Predictors vs. Log-Antibody"
-  )
+  ) + theme_test()
 ```
 
 
@@ -207,7 +215,7 @@ dat1 %>%
     x = "Category",
     y = "Log-Antibody",
     title = "Boxplots of Log-Antibody by Categorical Predictors"
-  )
+  ) + theme_test()
 ```
 
 # Antibody level and time
@@ -215,12 +223,14 @@ dat1 %>%
 p1 <- ggplot(dat1, aes(x = time, y = log_antibody)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "loess", color = "blue") +
-  labs(title = "Antibody Level vs Time Since Vaccination (dat1)")
+  labs(title = "Antibody Level vs Time Since Vaccination (dat1)") +
+  theme_classic()
 
 p2 <- ggplot(dat2, aes(x = time, y = log_antibody)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "loess", color = "blue") +
-  labs(title = "Antibody Level vs Time Since Vaccination (dat2)")
+  labs(title = "Antibody Level vs Time Since Vaccination (dat2)") +
+  theme_classic()
 
 p1+p2
 ```
