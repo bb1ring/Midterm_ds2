@@ -37,6 +37,10 @@ dat1 =
 dat2 =
   dat2 |>
   select(-id)
+
+dat2$gender <- factor(dat2$gender, levels = levels(dat1$gender))
+dat2$diabetes <- factor(dat2$diabetes, levels = levels(dat1$diabetes))
+dat2$hypertension <- factor(dat2$hypertension, levels = levels(dat1$hypertension))
 ```
 
 
@@ -220,13 +224,15 @@ model_lasso <- train(
   method = "glmnet",
   trControl = ctrl,
   tuneGrid = expand.grid(alpha = 1,
-                         lambda = exp(seq(2, -10, length = 100))
+                         lambda = exp(seq(2, -30, length = 100))
 
 ))
 
 plot(model_lasso, xTrans = log)
 model_lasso$bestTune
+
 ```
+
 
 
 ## GAM
@@ -272,6 +278,7 @@ vip(model_mars$finalModel, type = "rss")
 
 ```{r}
 set.seed(123)
+
 pred_lasso <- predict(model_lasso, newdata = dat2)
 pred_mars  <- predict(model_mars, newdata = dat2)
 pred_gam   <- predict(model_gam, newdata = dat2)
