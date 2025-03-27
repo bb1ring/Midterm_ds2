@@ -203,17 +203,6 @@ ctrl = trainControl(method = "cv", number = 10)
 
 ```{r}
 set.seed(123)
-x <- model.matrix(log_antibody ~ . , data = dat1)[, -1]
-y <- dat1$log_antibody
-
-cv_lasso <- cv.glmnet(x, y, alpha = 1, lambda = exp(seq(2, -10, length = 80)))
-cv_lasso$lambda.min
-cv_lasso$lambda.1se
-plot(cv_lasso)
-```
-
-```{r}
-set.seed(123)
 model_lasso <- train(
   log_antibody ~ .,
   data = dat1,
@@ -283,7 +272,7 @@ resample = resamples(list(lasso = model_lasso, gam = model_gam, mars = model_mar
 summary(resample)
 ```
 
-
+MARS model has the lowest RMSE (0.5276)
 
 
 # Antibody level and time
