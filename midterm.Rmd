@@ -264,6 +264,16 @@ vip(model_mars$finalModel, type = "rss")
 ```
 
 
+# Predictions and Model Evaluation
+
+```{r}
+pred_lasso <- predict(model_lasso, newdata = dat2)
+pred_mars  <- predict(model_mars, newdata = dat2)
+pred_gam   <- predict(model_gam, newdata = dat2)
+
+resample = resamples(list(lasso = model_lasso, gam = model_gam, mars = model_mars))
+summary(resample)
+```
 
 
 
@@ -274,22 +284,11 @@ vip(model_mars$finalModel, type = "rss")
 
 # GAM
 
-set.seed(123)
-
-gam.fit <- train(x1, y1, method = "gam", trControl = ctrl)
-gam.fit$bestTune
-gam.fit$finalModel
-
-
-plot(gam.fit$finalModel)
 
 pred_gam <- predict(gam.fit$finalModel, newdata = dat2)
 sqrt(mean((pred_gam - y2)^2))
 
 
-
-resample = resamples(list(lasso = lasso.fit, gam = gam.fit))
-summary(resample)
 
 
 # Antibody level and time
