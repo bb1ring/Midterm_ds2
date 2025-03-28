@@ -1,6 +1,6 @@
 ---
 title: "Midterm"
-author: "Sining Leng"
+author: "Group 4"
 date: "2025-03-24"
 output: pdf_document
 editor_options: 
