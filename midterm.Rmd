@@ -316,6 +316,34 @@ pred_gam   <- predict(model_gam, newdata = dat2)
 
 resample = resamples(list(lasso = model_lasso, gam = model_gam, mars = model_mars))
 summary(resample)
+
+# Visualization on predicteed vs. observed
+ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_mars), 
+       aes(x = dat2$log_antibody, y = pred_mars)) +
+  geom_point(alpha = 0.6, color = "#2c7fb8") +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
+  geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
+  labs(
+    title = "Predicted vs. Observed Antibody Levels",
+    x = "Observed Log Antibody Level",
+    y = "Predicted Log Antibody Level"
+  ) +
+  theme_minimal()
+
+residuals <- dat2$log_antibody - pred_mars
+
+ggplot(data.frame(Predicted = pred_mars, Residuals = residuals), 
+       aes(x = pred_mars, y = residuals)) +
+  geom_point(alpha = 0.6, color = "#f46d43") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
+  geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
+  labs(
+    title = "Residual Plot",
+    x = "Predicted Log Antibody Level",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
 ```
 
 MARS model has the lowest RMSE (0.5276)
