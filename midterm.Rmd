@@ -330,10 +330,37 @@ ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_mars),
   ) +
   theme_minimal()
 
-residuals <- dat2$log_antibody - pred_mars
+ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_lasso), 
+       aes(x = dat2$log_antibody, y = pred_lasso)) +
+  geom_point(alpha = 0.6, color = "#2c7fb8") +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
+  geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
+  labs(
+    title = "Predicted vs. Observed Antibody Levels",
+    x = "Observed Log Antibody Level",
+    y = "Predicted Log Antibody Level"
+  ) +
+  theme_minimal()
 
-ggplot(data.frame(Predicted = pred_mars, Residuals = residuals), 
-       aes(x = pred_mars, y = residuals)) +
+ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_gam), 
+       aes(x = dat2$log_antibody, y = pred_gam)) +
+  geom_point(alpha = 0.6, color = "#2c7fb8") +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
+  geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
+  labs(
+    title = "Predicted vs. Observed Antibody Levels",
+    x = "Observed Log Antibody Level",
+    y = "Predicted Log Antibody Level"
+  ) +
+  theme_minimal()
+
+# Residual Plot
+residual_mars <- dat2$log_antibody - pred_mars
+residual_lasso <- dat2$log_antibody - pred_lasso
+residual_gam <- dat2$log_antibody - pred_gam
+
+ggplot(data.frame(Predicted = pred_mars, Residuals = residual_mars), 
+       aes(x = pred_mars, y = residual_mars)) +
   geom_point(alpha = 0.6, color = "#f46d43") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
   geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
@@ -344,6 +371,29 @@ ggplot(data.frame(Predicted = pred_mars, Residuals = residuals),
   ) +
   theme_minimal()
 
+ggplot(data.frame(Predicted = pred_lasso, Residuals = residual_lasso), 
+       aes(x = pred_lasso, y = residual_lasso)) +
+  geom_point(alpha = 0.6, color = "#f46d43") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
+  geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
+  labs(
+    title = "Residual Plot",
+    x = "Predicted Log Antibody Level",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
+ggplot(data.frame(Predicted = pred_gam, Residuals = residual_gam), 
+       aes(x = pred_gam, y = residual_gam)) +
+  geom_point(alpha = 0.6, color = "#f46d43") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
+  geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
+  labs(
+    title = "Residual Plot",
+    x = "Predicted Log Antibody Level",
+    y = "Residuals"
+  ) +
+  theme_minimal()
 ```
 
 MARS model has the lowest RMSE (0.5276)
