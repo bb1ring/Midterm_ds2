@@ -218,7 +218,8 @@ dat1 %>%
   ) + theme_test()
 ```
 
-# Antibody level and time
+## Antibody level and time
+
 ```{r}
 p1 <- ggplot(dat1, aes(x = time, y = log_antibody)) +
   geom_point(alpha = 0.5) +
@@ -235,6 +236,17 @@ p2 <- ggplot(dat2, aes(x = time, y = log_antibody)) +
 p1+p2
 ```
 
+## New datasets after adjustment
+
+```{r}
+dat1 = 
+  dat1 |>
+  select(-bmi)
+
+dat2 = 
+  dat2 |>
+  select(-bmi)
+```
 
 # Models Building
 
@@ -255,15 +267,14 @@ model_lasso <- train(
   method = "glmnet",
   trControl = ctrl,
   tuneGrid = expand.grid(alpha = 1,
-                         lambda = exp(seq(2, -30, length = 100))
+                         lambda = exp(seq(2, -8, length = 100))
 
 ))
 
 plot(model_lasso, xTrans = log)
 model_lasso$bestTune
-
+coef(model_lasso$finalModel, model_lasso$bestTune$lambda)
 ```
-
 
 
 ## GAM
@@ -283,8 +294,6 @@ model_gam$bestTune
 par(mfrow = c(2,2))
 plot(model_gam$finalModel)
 ```
-
-
 
 ## MARS
 
@@ -324,7 +333,7 @@ ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_mars),
   geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
   geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
   labs(
-    title = "Predicted vs. Observed Antibody Levels",
+    title = "Predicted vs. Observed Antibody Levels (MARS)",
     x = "Observed Log Antibody Level",
     y = "Predicted Log Antibody Level"
   ) +
@@ -336,7 +345,7 @@ ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_lasso),
   geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
   geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
   labs(
-    title = "Predicted vs. Observed Antibody Levels",
+    title = "Predicted vs. Observed Antibody Levels (LASSO)",
     x = "Observed Log Antibody Level",
     y = "Predicted Log Antibody Level"
   ) +
@@ -348,7 +357,7 @@ ggplot(data.frame(Observed = dat2$log_antibody, Predicted = pred_gam),
   geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", size = 1) +
   geom_smooth(method = "loess", se = FALSE, color = "darkgreen") +
   labs(
-    title = "Predicted vs. Observed Antibody Levels",
+    title = "Predicted vs. Observed Antibody Levels (GAM)",
     x = "Observed Log Antibody Level",
     y = "Predicted Log Antibody Level"
   ) +
@@ -365,7 +374,7 @@ ggplot(data.frame(Predicted = pred_mars, Residuals = residual_mars),
   geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
   geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
   labs(
-    title = "Residual Plot",
+    title = "Residual Plot (MARS)",
     x = "Predicted Log Antibody Level",
     y = "Residuals"
   ) +
@@ -377,7 +386,7 @@ ggplot(data.frame(Predicted = pred_lasso, Residuals = residual_lasso),
   geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
   geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
   labs(
-    title = "Residual Plot",
+    title = "Residual Plot (lasso)",
     x = "Predicted Log Antibody Level",
     y = "Residuals"
   ) +
@@ -389,12 +398,12 @@ ggplot(data.frame(Predicted = pred_gam, Residuals = residual_gam),
   geom_hline(yintercept = 0, linetype = "dashed", color = "darkgray") +
   geom_smooth(method = "loess", se = FALSE, color = "#2c7fb8") +
   labs(
-    title = "Residual Plot",
+    title = "Residual Plot (GAM)",
     x = "Predicted Log Antibody Level",
     y = "Residuals"
   ) +
   theme_minimal()
 ```
 
-MARS model has the lowest RMSE (0.5276)
+lasso model has the lowest mean RMSE (0.5534342)
 
